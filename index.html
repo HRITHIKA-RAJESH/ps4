@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code2Create — BGH Squad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #7c6aff;
+    --accent2: #ff6a8a;
+    --green: #4fffb0;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(124,106,255,0.1);
+    border: 1px solid rgba(124,106,255,0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .team-tag {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .team-tag .label { color: var(--muted); margin-bottom: 4px; }
+  .team-tag .value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+  .team-tag .female { color: var(--accent2); font-size: 11px; margin-top: 2px; }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 32px 0;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.1s; }
+  .stat-card:nth-child(2) { animation-delay: 0.2s; }
+  .stat-card:nth-child(3) { animation-delay: 0.3s; }
+  .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Architecture */
+  .section {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .flow-step:nth-child(odd) { animation-delay: 0.1s; }
+  .flow-step:nth-child(even) { animation-delay: 0.2s; }
+
+  .step-num {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .arrow {
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* Formula */
+  .formula-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .formula-box .eq {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .formula-box .comment {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  thead tr {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(30,30,46,0.8);
+    transition: background 0.15s;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  tbody tr:hover { background: rgba(124,106,255,0.05); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 13px 16px;
+    color: var(--text);
+  }
+
+  .platform-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .platform-badge.instagram {
+    background: rgba(255,106,138,0.12);
+    color: var(--accent2);
+    border: 1px solid rgba(255,106,138,0.2);
+  }
+
+  .platform-badge.youtube {
+    background: rgba(124,106,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(124,106,255,0.2);
+  }
+
+  .decision-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .decision-badge.now {
+    background: rgba(79,255,176,0.1);
+    color: var(--green);
+    border: 1px solid rgba(79,255,176,0.2);
+  }
+
+  .decision-badge.schedule {
+    background: rgba(107,107,128,0.15);
+    color: var(--muted);
+    border: 1px solid rgba(107,107,128,0.2);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .type-short { color: var(--accent2); }
+  .type-long  { color: var(--accent); }
+
+  /* Footer */
+  footer {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .flow  { flex-direction: column; align-items: flex-start; }
+    .arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="badge">Code2Create · ACM RIT 2025</div>
+        <h1>Creator Content<br><span>Posting Optimizer</span></h1>
+        <p class="subtitle">PS4 — Joint platform & time slot optimization<br>using engagement scoring + creator adaptation</p>
+      </div>
+      <div class="team-tag">
+        <div class="label">Team</div>
+        <div class="value">BGH Squad</div>
+        <div class="female">★ All-Female Team · 2nd Year CSE</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num">100</div>
+      <div class="stat-label">Content Items</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">50</div>
+      <div class="stat-label">Creators</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">35</div>
+      <div class="stat-label">POST_NOW</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">65</div>
+      <div class="stat-label">SCHEDULED</div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section">
+    <div class="section-title">System Architecture</div>
+    <div class="flow">
+      <div class="flow-step"><span class="step-num">1</span> Load 4 CSVs</div>
+      <span class="arrow">→</span>
+      <div class="flow-step"><span class="step-num">2</span> Build O(1) Lookup Dicts</div>
+      <span class="arrow">→</span>
+      <div class="flow-step"><span class="step-num">3</span> Score 48 Combos per Item</div>
+      <span class="arrow">→</span>
+      <div class="flow-step"><span class="step-num">4</span> Pick Best Platform + Slot</div>
+      <span class="arrow">→</span>
+      <div class="flow-step"><span class="step-num">5</span> POST_NOW / SCHEDULE</div>
+    </div>
+
+    <div class="formula-box">
+      <span class="eq">score</span> = 0.50 × (base_engagement × activity_score × avg_engagement)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.20 × activity_score<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.15 × platform_quality_bias<br>
+      <br>
+      <span class="comment">// platform_quality: SHORT→Instagram = 1.0 | LONG→YouTube = 1.0 | SHORT→YouTube = 0.85 | LONG→Instagram = 0.70</span><br>
+      <span class="comment">// decision: POST_NOW if time_sensitivity == "High" OR best_slot == created_timestamp</span>
+    </div>
+  </div>
+
+  <!-- Sample Results Table -->
+  <div class="section">
+    <div class="section-title">Sample Recommendations (First 15)</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Content ID</th>
+            <th>Creator</th>
+            <th>Type</th>
+            <th>Platform</th>
+            <th>Time Slot</th>
+            <th>Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td>24</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>2</td><td>2</td><td>43</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>22:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>3</td><td>3</td><td>44</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>4</td><td>4</td><td>41</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>5</td><td>5</td><td>47</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>21:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>6</td><td>6</td><td>30</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>7</td><td>7</td><td>41</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>8</td><td>8</td><td>21</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>18:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>9</td><td>9</td><td>3</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>23:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>10</td><td>10</td><td>18</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>22:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>11</td><td>11</td><td>37</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>12</td><td>12</td><td>42</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>13</td><td>13</td><td>42</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>14</td><td>14</td><td>17</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>18:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>15</td><td>15</td><td>48</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    BGH Squad · Code2Create · ACM RIT Regional Event 2025 · PS4 — Creator Content Posting Optimization
+  </footer>
+
+</div>
+</body>
+</html>
