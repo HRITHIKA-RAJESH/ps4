@@ -1,18 +1,13 @@
 # Creator Content Posting Optimization System
 
 ## Team Information
-- **Team Name**: [Team Name]
-- **Year**: [Year]
-- **All-Female Team**: [Yes/No]
+- **Team Name**: BGH Squad
+- **Year**: 2nd Year
+- **All-Female Team**: Yes
 
 ## Architecture Overview
 
-**Instructions**: Describe your approach in 200 words or less. Address the following:
-
-- How does your system determine the optimal posting time for content?
-- What strategy do you use to select between Instagram and YouTube platforms?
-- How do you balance platform activity patterns with creator-specific engagement history?
-- What approach do you take to decide between immediate posting versus scheduling?
+Our system loads all four CSVs into memory using dictionary lookups for O(1) access. For each content item, we jointly optimize platform and time slot by computing a weighted engagement score: base_engagement × activity_score × avg_engagement with a soft platform quality bias (SHORT→Instagram=1.0, LONG→YouTube=1.0). We select the globally optimal (platform, time_slot) pair and decide POST_NOW if the optimal slot matches submission time, else SCHEDULE. This ensures deterministic, fast recommendations that maximize engagement while respecting content-type and platform affinity signals.
 
 ---
 
