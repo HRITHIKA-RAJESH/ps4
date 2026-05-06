@@ -1,9 +1,9 @@
 """
 Creator Content Posting Optimization System
-Team: [Your Team Name]
+Team: BGH Squad
 Approach: Joint greedy optimization of platform + time_slot using
           engagement scoring: base_engagement * activity_score * avg_engagement
-          with soft platform quality bias.
+          with soft platform quality bias and time sensitivity handling.
 """
 
 import pandas as pd
@@ -69,7 +69,6 @@ def compute_score(creator_id, content_type, platform, time_slot):
     timing     = act                       # 20% weight
     plat_score = pq                        # 15% weight
 
-    # Weighted combo (efficiency is runtime, not per-item)
     combined = 0.50 * engagement + 0.20 * timing + 0.15 * plat_score
     return combined
 
@@ -85,24 +84,26 @@ for _, row in content_df.iterrows():
     creator_id       = row["creator_id"]
     content_type     = row["content_type"]
     created_ts       = row["created_timestamp"]
+    time_sensitivity = row.get("time_sensitivity", "Medium")
 
     best_score    = -1
     best_platform = None
     best_slot     = None
 
-    # Joint optimization: try all platform × time_slot combos
+    # Joint optimization: try all platform x time_slot combos
     for platform in PLATFORMS:
         for ts in TIME_SLOTS:
             score = compute_score(creator_id, content_type, platform, ts)
-            # Deterministic tie-breaking: prefer lower time_slot, then Instagram
+            # Deterministic tie-breaking: prefer lower time_slot
             if score > best_score:
                 best_score    = score
                 best_platform = platform
                 best_slot     = ts
 
     # Scheduling decision
-    # POST_NOW if optimal slot is current hour or already past and within 1h
-    if best_slot == created_ts:
+    # High sensitivity = always post now
+    # Otherwise POST_NOW only if optimal slot matches current hour
+    if time_sensitivity == "High" or best_slot == created_ts:
         decision = "POST_NOW"
     else:
         decision = "SCHEDULE"
@@ -127,3 +128,4 @@ print(f"   POST_NOW: {(submission['decision']=='POST_NOW').sum()}")
 print(f"   SCHEDULE: {(submission['decision']=='SCHEDULE').sum()}")
 print("\nSample output:")
 print(submission.head(10).to_string())
+
