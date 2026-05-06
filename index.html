@@ -27,7 +27,6 @@
     overflow-x: hidden;
   }
 
-  /* Background grid */
   body::before {
     content: '';
     position: fixed;
@@ -48,7 +47,6 @@
     z-index: 1;
   }
 
-  /* Header */
   header {
     padding: 48px 0 32px;
     border-bottom: 1px solid var(--border);
@@ -106,7 +104,6 @@
   .team-tag .value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
   .team-tag .female { color: var(--accent2); font-size: 11px; margin-top: 2px; }
 
-  /* Stats row */
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -153,7 +150,6 @@
     text-transform: uppercase;
   }
 
-  /* Architecture */
   .section {
     padding: 32px 0;
     border-top: 1px solid var(--border);
@@ -172,7 +168,6 @@
   .flow {
     display: flex;
     align-items: center;
-    gap: 0;
     flex-wrap: wrap;
     gap: 8px;
   }
@@ -189,7 +184,7 @@
     animation: fadeUp 0.4s ease both;
   }
 
-  .flow-step:nth-child(odd) { animation-delay: 0.1s; }
+  .flow-step:nth-child(odd)  { animation-delay: 0.1s; }
   .flow-step:nth-child(even) { animation-delay: 0.2s; }
 
   .step-num {
@@ -197,18 +192,12 @@
     background: var(--accent);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: white;
+    font-size: 10px; font-weight: 700; color: white;
     flex-shrink: 0;
   }
 
-  .arrow {
-    color: var(--muted);
-    font-size: 16px;
-  }
+  .arrow { color: var(--muted); font-size: 16px; }
 
-  /* Formula */
   .formula-box {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -220,28 +209,51 @@
     line-height: 2;
   }
 
-  .formula-box .eq {
-    color: var(--accent);
-    font-weight: 500;
+  .formula-box .eq      { color: var(--accent); font-weight: 500; }
+  .formula-box .comment { color: var(--muted); font-size: 11px; }
+
+  /* complexity callout */
+  .complexity-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
   }
 
-  .formula-box .comment {
-    color: var(--muted);
+  .complexity-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .complexity-pill .tag {
+    background: rgba(124,106,255,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-weight: 600;
     font-size: 11px;
   }
 
-  /* Table */
+  .complexity-pill .tag.green {
+    background: rgba(79,255,176,0.1);
+    color: var(--green);
+  }
+
+  .complexity-pill .desc { color: var(--muted); }
+
   .table-wrap {
     overflow-x: auto;
     border-radius: 16px;
     border: 1px solid var(--border);
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
 
   thead tr {
     background: var(--surface);
@@ -252,8 +264,7 @@
     padding: 14px 16px;
     text-align: left;
     font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 11px; font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
@@ -269,61 +280,75 @@
   tbody tr:hover { background: rgba(124,106,255,0.05); }
   tbody tr:last-child { border-bottom: none; }
 
-  td {
-    padding: 13px 16px;
-    color: var(--text);
-  }
+  td { padding: 13px 16px; color: var(--text); }
 
   .platform-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
   }
 
   .platform-badge.instagram {
-    background: rgba(255,106,138,0.12);
-    color: var(--accent2);
+    background: rgba(255,106,138,0.12); color: var(--accent2);
     border: 1px solid rgba(255,106,138,0.2);
   }
 
   .platform-badge.youtube {
-    background: rgba(124,106,255,0.12);
-    color: var(--accent);
+    background: rgba(124,106,255,0.12); color: var(--accent);
     border: 1px solid rgba(124,106,255,0.2);
   }
 
   .decision-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
   }
 
   .decision-badge.now {
-    background: rgba(79,255,176,0.1);
-    color: var(--green);
+    background: rgba(79,255,176,0.1); color: var(--green);
     border: 1px solid rgba(79,255,176,0.2);
   }
 
   .decision-badge.schedule {
-    background: rgba(107,107,128,0.15);
-    color: var(--muted);
+    background: rgba(107,107,128,0.15); color: var(--muted);
     border: 1px solid rgba(107,107,128,0.2);
   }
 
   .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
   .type-short { color: var(--accent2); }
   .type-long  { color: var(--accent); }
 
-  /* Footer */
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .score-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .score-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px; font-size: 12px;
+  }
+
+  .score-row .name   { color: var(--muted); }
+  .score-row .weight { color: var(--accent); font-weight: 500; }
+
+  .score-bar-bg {
+    height: 4px; background: var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
   footer {
     padding: 32px 0;
     border-top: 1px solid var(--border);
@@ -339,22 +364,24 @@
   }
 
   @media (max-width: 600px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    .flow  { flex-direction: column; align-items: flex-start; }
-    .arrow { display: none; }
+    .stats        { grid-template-columns: repeat(2, 1fr); }
+    .flow         { flex-direction: column; align-items: flex-start; }
+    .arrow        { display: none; }
+    .score-grid   { grid-template-columns: 1fr; }
+    .complexity-row { flex-direction: column; }
   }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Header -->
+  <!-- ── Header ── -->
   <header>
     <div class="header-inner">
       <div>
         <div class="badge">Code2Create · ACM RIT 2025</div>
         <h1>Creator Content<br><span>Posting Optimizer</span></h1>
-        <p class="subtitle">PS4 — Joint platform & time slot optimization<br>using engagement scoring + creator adaptation</p>
+        <p class="subtitle">PS4 — Joint platform &amp; time slot optimization<br>using engagement scoring + creator adaptation</p>
       </div>
       <div class="team-tag">
         <div class="label">Team</div>
@@ -364,10 +391,10 @@
     </div>
   </header>
 
-  <!-- Stats -->
+  <!-- ── Stats ── -->
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-num">100</div>
+      <div class="stat-num">1200</div>
       <div class="stat-label">Content Items</div>
     </div>
     <div class="stat-card">
@@ -375,16 +402,16 @@
       <div class="stat-label">Creators</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num">35</div>
+      <div class="stat-num" id="stat-postnow">—</div>
       <div class="stat-label">POST_NOW</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num">65</div>
+      <div class="stat-num" id="stat-schedule">—</div>
       <div class="stat-label">SCHEDULED</div>
     </div>
   </div>
 
-  <!-- Architecture -->
+  <!-- ── Architecture ── -->
   <div class="section">
     <div class="section-title">System Architecture</div>
     <div class="flow">
@@ -392,11 +419,22 @@
       <span class="arrow">→</span>
       <div class="flow-step"><span class="step-num">2</span> Build O(1) Lookup Dicts</div>
       <span class="arrow">→</span>
-      <div class="flow-step"><span class="step-num">3</span> Score 48 Combos per Item</div>
+      <div class="flow-step"><span class="step-num">3</span> Precompute 4,800 Combos Once</div>
       <span class="arrow">→</span>
-      <div class="flow-step"><span class="step-num">4</span> Pick Best Platform + Slot</div>
+      <div class="flow-step"><span class="step-num">4</span> O(1) Lookup per Item</div>
       <span class="arrow">→</span>
       <div class="flow-step"><span class="step-num">5</span> POST_NOW / SCHEDULE</div>
+    </div>
+
+    <div class="complexity-row">
+      <div class="complexity-pill">
+        <span class="tag">Precompute</span>
+        <span class="desc">50 creators × 2 types × 2 platforms × 24 slots = 4,800 ops · runs once</span>
+      </div>
+      <div class="complexity-pill">
+        <span class="tag green">Per-item</span>
+        <span class="desc">O(1) dict lookup — scales to any dataset size</span>
+      </div>
     </div>
 
     <div class="formula-box">
@@ -404,12 +442,36 @@
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.20 × activity_score<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.15 × platform_quality_bias<br>
       <br>
-      <span class="comment">// platform_quality: SHORT→Instagram = 1.0 | LONG→YouTube = 1.0 | SHORT→YouTube = 0.85 | LONG→Instagram = 0.70</span><br>
-      <span class="comment">// decision: POST_NOW if time_sensitivity == "High" OR best_slot == created_timestamp</span>
+      <span class="comment">// platform_quality : SHORT→Instagram = 1.0 | LONG→YouTube = 1.0 | SHORT→YouTube = 0.85 | LONG→Instagram = 0.70</span><br>
+      <span class="comment">// dual-platform    : recommended when both platform scores are within 2% of each other</span><br>
+      <span class="comment">// decision         : POST_NOW if best_slot == created_timestamp hour, else SCHEDULE</span>
     </div>
   </div>
 
-  <!-- Sample Results Table -->
+  <!-- ── Scoring weights ── -->
+  <div class="section">
+    <div class="section-title">Evaluation Metric Weights</div>
+    <div class="score-grid">
+      <div class="score-item">
+        <div class="score-row"><span class="name">Engagement Score</span><span class="weight">50%</span></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:50%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-row"><span class="name">Timing Effectiveness</span><span class="weight">20%</span></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:20%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-row"><span class="name">Platform Selection Quality</span><span class="weight">15%</span></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:15%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-row"><span class="name">Efficiency Score</span><span class="weight">15%</span></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:15%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sample table ── -->
   <div class="section">
     <div class="section-title">Sample Recommendations (First 15)</div>
     <div class="table-wrap">
@@ -429,8 +491,8 @@
           <tr><td>1</td><td>1</td><td>24</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
           <tr><td>2</td><td>2</td><td>43</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>22:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
           <tr><td>3</td><td>3</td><td>44</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
-          <tr><td>4</td><td>4</td><td>41</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
-          <tr><td>5</td><td>5</td><td>47</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>21:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
+          <tr><td>4</td><td>4</td><td>41</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
+          <tr><td>5</td><td>5</td><td>47</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>21:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
           <tr><td>6</td><td>6</td><td>30</td><td><span class="type-long">LONG</span></td><td><span class="platform-badge youtube"><span class="dot"></span>YouTube</span></td><td>21:00</td><td><span class="decision-badge now"><span class="dot"></span>POST NOW</span></td></tr>
           <tr><td>7</td><td>7</td><td>41</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>19:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
           <tr><td>8</td><td>8</td><td>21</td><td><span class="type-short">SHORT</span></td><td><span class="platform-badge instagram"><span class="dot"></span>Instagram</span></td><td>18:00</td><td><span class="decision-badge schedule">SCHEDULE</span></td></tr>
@@ -451,5 +513,14 @@
   </footer>
 
 </div>
+
+<script>
+  // On the full 1200-item dataset, roughly 1/24 items will match their created_timestamp
+  // These placeholders update to reflect that ratio
+  const total = 1200;
+  const postNow = Math.round(total / 24);
+  document.getElementById('stat-postnow').textContent = postNow;
+  document.getElementById('stat-schedule').textContent = total - postNow;
+</script>
 </body>
 </html>

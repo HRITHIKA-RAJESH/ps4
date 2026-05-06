@@ -1,131 +1,168 @@
 """
 Creator Content Posting Optimization System
 Team: BGH Squad
-Approach: Joint greedy optimization of platform + time_slot using
-          engagement scoring: base_engagement * activity_score * avg_engagement
-          with soft platform quality bias and time sensitivity handling.
+
+Optimization Strategy:
+  Pre-compute the best (platform, time_slot) for every (creator_id, content_type)
+  combination at startup. At evaluation time, each content item is a single O(1)
+  dict lookup — no per-item scoring loop.
+
+  Precomputation: O(C × T × P)  where C=creators, T=24 slots, P=2 platforms
+  Per-item:       O(1)
+  Total:          effectively O(N) for N content items
+
+Score formula mirrors the evaluation script exactly:
+    score = 0.50 × (base × activity × history)
+          + 0.20 × activity
+          + 0.15 × platform_quality
 """
 
 import pandas as pd
 import time
 
-# ──────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
+# CONFIG
+# ──────────────────────────────────────────────────────────────────────────────
+DATA_DIR       = "data/raw/"
+OUTPUT_FILE    = "submission.csv"
+PLATFORMS      = ["Instagram", "YouTube"]
+TIME_SLOTS     = list(range(24))
+DUAL_THRESHOLD = 0.02   # recommend both platforms if scores within 2%
+
+# ──────────────────────────────────────────────────────────────────────────────
+# PLATFORM QUALITY BIAS  (mirrors scoring script exactly)
+# ──────────────────────────────────────────────────────────────────────────────
+_PQ = {
+    ("SHORT", "Instagram"): 1.00,
+    ("LONG",  "YouTube"):   1.00,
+    ("SHORT", "YouTube"):   0.85,
+    ("LONG",  "Instagram"): 0.70,
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # 1. LOAD DATA
-# ──────────────────────────────────────────────
-content_df   = pd.read_csv("data/raw/content.csv")
-creators_df  = pd.read_csv("data/raw/creators.csv")
-history_df   = pd.read_csv("data/raw/historical_engagement.csv")
-activity_df  = pd.read_csv("data/raw/platform_activity.csv")
+# ──────────────────────────────────────────────────────────────────────────────
+def load_data():
+    content_df  = pd.read_csv(f"{DATA_DIR}content.csv")
+    creators_df = pd.read_csv(f"{DATA_DIR}creators.csv")
+    history_df  = pd.read_csv(f"{DATA_DIR}historical_engagement.csv")
+    activity_df = pd.read_csv(f"{DATA_DIR}platform_activity.csv")
+    return content_df, creators_df, history_df, activity_df
 
-# ──────────────────────────────────────────────
-# 2. BUILD FAST LOOKUP DICTIONARIES
-# ──────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
+# 2. BUILD O(1) LOOKUP DICTS
+# ──────────────────────────────────────────────────────────────────────────────
+def build_maps(creators_df, history_df, activity_df):
+    activity_map = {
+        (r["platform"], int(r["time_slot"])): r["activity_score"]
+        for _, r in activity_df.iterrows()
+    }
+    history_map = {
+        (int(r["creator_id"]), r["platform"], r["content_type"], int(r["time_slot"])): r["avg_engagement"]
+        for _, r in history_df.iterrows()
+    }
+    creator_map = {
+        int(r["creator_id"]): r["base_engagement"]
+        for _, r in creators_df.iterrows()
+    }
+    return activity_map, history_map, creator_map
 
-# activity[(platform, time_slot)] = score
-activity_map = {
-    (row["platform"], row["time_slot"]): row["activity_score"]
-    for _, row in activity_df.iterrows()
-}
+# ──────────────────────────────────────────────────────────────────────────────
+# 3. PRE-COMPUTE BEST (platform, slot) FOR EVERY (creator, content_type)
+#    Runs ONCE at startup. Per-item recommendation is then O(1).
+# ──────────────────────────────────────────────────────────────────────────────
+def precompute_best(creator_map, activity_map, history_map):
+    best_map = {}
+    content_types = ["SHORT", "LONG"]
 
-# history[(creator_id, platform, content_type, time_slot)] = avg_engagement
-history_map = {
-    (row["creator_id"], row["platform"], row["content_type"], row["time_slot"]): row["avg_engagement"]
-    for _, row in history_df.iterrows()
-}
+    for creator_id, base in creator_map.items():
+        for ct in content_types:
+            per_platform = {}
+            for platform in PLATFORMS:
+                best_score = -1.0
+                best_slot  = None
+                for ts in TIME_SLOTS:
+                    act   = activity_map.get((platform, ts), 0.6)
+                    hist  = history_map.get((creator_id, platform, ct, ts), 0.5)
+                    pq    = _PQ[(ct, platform)]
+                    score = 0.50 * (base * act * hist) + 0.20 * act + 0.15 * pq
+                    if score > best_score:
+                        best_score = score
+                        best_slot  = ts
+                per_platform[platform] = (best_slot, best_score)
 
-# creator[creator_id] = base_engagement
-creator_map = {
-    row["creator_id"]: row["base_engagement"]
-    for _, row in creators_df.iterrows()
-}
+            ig_slot, ig_score = per_platform["Instagram"]
+            yt_slot, yt_score = per_platform["YouTube"]
 
-PLATFORMS   = ["Instagram", "YouTube"]
-TIME_SLOTS  = list(range(24))
+            if ig_score >= yt_score:
+                winner_platform, winner_slot, winner_score = "Instagram", ig_slot, ig_score
+                other_score = yt_score
+            else:
+                winner_platform, winner_slot, winner_score = "YouTube", yt_slot, yt_score
+                other_score = ig_score
 
-# ──────────────────────────────────────────────
-# 3. PLATFORM QUALITY BIAS (soft, 15% of score)
-# ──────────────────────────────────────────────
-def platform_quality(content_type, platform):
-    if content_type == "SHORT" and platform == "Instagram":
-        return 1.0
-    elif content_type == "LONG" and platform == "YouTube":
-        return 1.0
-    elif content_type == "SHORT" and platform == "YouTube":
-        return 0.85
-    else:  # LONG on Instagram
-        return 0.70
+            if winner_score > 0 and (winner_score - other_score) / winner_score <= DUAL_THRESHOLD:
+                platform_out = "Instagram,YouTube"
+            else:
+                platform_out = winner_platform
 
-# ──────────────────────────────────────────────
-# 4. SCORE A SINGLE (platform, time_slot) COMBO
-# ──────────────────────────────────────────────
-def compute_score(creator_id, content_type, platform, time_slot):
-    base  = creator_map.get(creator_id, 1.0)
-    act   = activity_map.get((platform, time_slot), 0.6)
-    hist  = history_map.get((creator_id, platform, content_type, time_slot), 0.5)
-    pq    = platform_quality(content_type, platform)
+            best_map[(creator_id, ct)] = (platform_out, winner_slot)
 
-    # Combined score matching evaluation formula weights
-    engagement = base * act * hist         # 50% weight in final eval
-    timing     = act                       # 20% weight
-    plat_score = pq                        # 15% weight
+    return best_map
 
-    combined = 0.50 * engagement + 0.20 * timing + 0.15 * plat_score
-    return combined
+# ──────────────────────────────────────────────────────────────────────────────
+# 4. GENERATE RECOMMENDATIONS  — O(1) per item
+# ──────────────────────────────────────────────────────────────────────────────
+def generate_submissions(content_df, best_map):
+    results = []
+    for _, row in content_df.iterrows():
+        content_id   = int(row["content_id"])
+        creator_id   = int(row["creator_id"])
+        content_type = row["content_type"]
+        created_ts   = int(row["created_timestamp"])
 
-# ──────────────────────────────────────────────
-# 5. GENERATE RECOMMENDATIONS
-# ──────────────────────────────────────────────
-start_time = time.time()
+        platform, best_slot = best_map[(creator_id, content_type)]
+        decision = "POST_NOW" if best_slot == created_ts else "SCHEDULE"
 
-results = []
+        results.append({
+            "content_id": content_id,
+            "platform":   platform,
+            "time_slot":  best_slot,
+            "decision":   decision,
+        })
+    return pd.DataFrame(results)
 
-for _, row in content_df.iterrows():
-    content_id       = row["content_id"]
-    creator_id       = row["creator_id"]
-    content_type     = row["content_type"]
-    created_ts       = row["created_timestamp"]
-    time_sensitivity = row.get("time_sensitivity", "Medium")
+# ──────────────────────────────────────────────────────────────────────────────
+# 5. MAIN
+# ──────────────────────────────────────────────────────────────────────────────
+def main():
+    t0 = time.time()
 
-    best_score    = -1
-    best_platform = None
-    best_slot     = None
+    content_df, creators_df, history_df, activity_df = load_data()
+    t_load = time.time()
 
-    # Joint optimization: try all platform x time_slot combos
-    for platform in PLATFORMS:
-        for ts in TIME_SLOTS:
-            score = compute_score(creator_id, content_type, platform, ts)
-            # Deterministic tie-breaking: prefer lower time_slot
-            if score > best_score:
-                best_score    = score
-                best_platform = platform
-                best_slot     = ts
+    activity_map, history_map, creator_map = build_maps(creators_df, history_df, activity_df)
+    t_maps = time.time()
 
-    # Scheduling decision
-    # High sensitivity = always post now
-    # Otherwise POST_NOW only if optimal slot matches current hour
-    if time_sensitivity == "High" or best_slot == created_ts:
-        decision = "POST_NOW"
-    else:
-        decision = "SCHEDULE"
+    best_map = precompute_best(creator_map, activity_map, history_map)
+    t_pre = time.time()
 
-    results.append({
-        "content_id": content_id,
-        "platform":   best_platform,
-        "time_slot":  best_slot,
-        "decision":   decision
-    })
+    submission = generate_submissions(content_df, best_map)
+    submission.to_csv(OUTPUT_FILE, index=False)
+    t_done = time.time()
 
-# ──────────────────────────────────────────────
-# 6. SAVE SUBMISSION
-# ──────────────────────────────────────────────
-submission = pd.DataFrame(results)
-submission.to_csv("submission.csv", index=False)
+    print(f"✅  submission.csv generated in {t_done - t0:.3f}s total")
+    print(f"    Load CSVs      : {t_load - t0:.3f}s")
+    print(f"    Build maps     : {t_maps - t_load:.3f}s")
+    print(f"    Precompute     : {t_pre - t_maps:.3f}s   <- 100 combos x 48 scores")
+    print(f"    Recommendations: {t_done - t_pre:.3f}s   <- pure O(1) lookups")
+    print(f"    Total items    : {len(submission)}")
+    print(f"    POST_NOW       : {(submission['decision'] == 'POST_NOW').sum()}")
+    print(f"    SCHEDULE       : {(submission['decision'] == 'SCHEDULE').sum()}")
+    print(f"    Dual-platform  : {submission['platform'].str.contains(',').sum()}")
+    print("\nSample output:")
+    print(submission.head(10).to_string(index=False))
 
-elapsed = time.time() - start_time
-print(f"✅ submission.csv generated in {elapsed:.3f}s")
-print(f"   Total items: {len(submission)}")
-print(f"   POST_NOW: {(submission['decision']=='POST_NOW').sum()}")
-print(f"   SCHEDULE: {(submission['decision']=='SCHEDULE').sum()}")
-print("\nSample output:")
-print(submission.head(10).to_string())
+if __name__ == "__main__":
+    main()
 
